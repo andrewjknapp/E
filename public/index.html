@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css">
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="https://kaboomjs.com/lib/0.1.0/kaboom.js"></script>
+    <script type="module">
+      // make kaboom functions global
+      kaboom.global();
+
+      //loadRoot("/public/");
+      loadSprite("E", "./sprites/E.png");
+      loadSprite("ground", "./sprites/ground.png");
+
+      // init kaboom context
+      init({
+        fullscreen: true,
+        scale: 3,
+      });
+
+      // define a scene
+      scene("main", () => {
+
+        gravity(980);
+
+        layers([
+          "game"
+        ], "game");
+
+        const map = addLevel([
+		"                         ",
+		"                         ",
+		"          ===            ",
+		"     ==========          ",
+		"                         ",
+		"                         ",
+		"                         ",
+		"                         ",
+		"               ======    ",
+		"                         ",
+		"                    ==   ",
+		"        =====      === ==",
+		"=========================",
+	], {
+    width: 11,
+    height: 11, 
+    pos: vec2(0,0),
+    "=": [
+      sprite("ground"),
+      solid(),
+    ],
+  });
+
+  const player = add([
+		sprite("E"),
+		pos(map.getPos(1, 0)),
+		scale(1),
+		body(),
+		origin("center"),
+    // area(vec2(16), vec2(16)),
+		{
+			speed: 160,
+			jumpForce: 320,
+		},
+	]);
+
+  keyPress("space", () => {
+		if (player.grounded()) {
+			player.jump(player.jumpForce);
+		}
+	});
+
+  keyDown("left", () => {
+		player.flipX(1);
+		player.move(-player.speed, 0);
+	});
+
+	keyDown("right", () => {
+		player.flipX(-1);
+		player.move(player.speed, 0);
+	});
+      });
+
+    //   kaboom.debug.showArea = !kaboom.debug.showArea;
+		// kaboom.debug.hoverInfo = !kaboom.debug.hoverInfo;
+
+      // start the game
+      start("main");
+    </script>
+  </body>
+</html>
