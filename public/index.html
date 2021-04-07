@@ -14,7 +14,9 @@
       kaboom.global();
 
       //loadRoot("/public/");
-      loadSprite("E", "./sprites/E.png");
+      loadSprite("E", "./sprites/E.png", {
+        aseSpriteSheet: "sprites/E.json",
+      });
       loadSprite("ground", "./sprites/ground.png");
 
       // init kaboom context
@@ -68,6 +70,18 @@
 			jumpForce: 320,
 		},
 	]);
+
+  keyDown(["left", "right"], () => {
+		if (player.grounded() && player.curAnim !== "move") {
+			player.play("move");
+		}
+	});
+
+	keyRelease(["left", "right"], () => {
+		if (!keyIsDown("right") && !keyIsDown("left")) {
+			player.play("idle");
+		}
+	});
 
   keyPress("space", () => {
 		if (player.grounded()) {
