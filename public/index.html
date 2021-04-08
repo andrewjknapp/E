@@ -16,6 +16,7 @@
       //loadRoot("/public/");
       loadSprite("E", "./sprites/E.png", {
         aseSpriteSheet: "sprites/E.json",
+        animSpeed: 0.1,
       });
       loadSprite("ground", "./sprites/ground.png");
 
@@ -35,19 +36,19 @@
         ], "game");
 
         const map = addLevel([
-		"                         ",
-		"                         ",
-		"          ===            ",
-		"     ==========          ",
-		"                         ",
-		"                         ",
-		"                         ",
-		"                         ",
-		"               ======    ",
-		"                         ",
-		"                    ==   ",
-		"        =====      === ==",
-		"=========================",
+		"                                                            ",
+		"                                                            ",
+		"          ===                                               ",
+		"     ==========                                             ",
+		"                                                            ",
+		"                                                            ",
+		"                                                            ",
+		"                                                            ",
+		"               ======                                       ",
+		"                                                            ",
+		"                    ==                                      ",
+		"        =====      === ==                                   ",
+		"============================================================",
 	], {
     width: 11,
     height: 11, 
@@ -66,38 +67,119 @@
 		origin("center"),
     // area(vec2(16), vec2(16)),
 		{
-			speed: 160,
-			jumpForce: 320,
+			speed: 100,
+			jumpForce: 240,
 		},
 	]);
 
-  keyDown(["left", "right"], () => {
+  /*****************************************************
+                  ANIMATIONS
+  *****************************************************/
+  keyDown(["a", "d"], () => {
 		if (player.grounded() && player.curAnim !== "move") {
 			player.play("move");
 		}
 	});
 
-	keyRelease(["left", "right"], () => {
-		if (!keyIsDown("right") && !keyIsDown("left")) {
+	keyRelease(["a", "d"], () => {
+		if (player.grounded() && !keyIsDown("d") && !keyIsDown("a")) {
 			player.play("idle");
 		}
 	});
 
-  keyPress("space", () => {
+  keyDown("s", () => {
+		if (player.grounded() && player.curAnim !== "move") {
+			player.play("crouch");
+		}
+	});
+
+	keyRelease("s", () => {
+		if (player.grounded() && !keyIsDown("d") && !keyIsDown("a")) {
+			player.play("idle");
+		}
+	});
+
+  keyDown("j", () => {
+
+    if (player.isAttacking) {
+      return;
+    }
+
+    player.isAttacking = true;
+
+		if (player.grounded() && player.curAnim === "crouch" && player.curAnim !== "crouchStab") {
+			player.play("crouchStab", false);
+		} else if (player.grounded() && player.curAnim !== "stab") {
+      player.play("stab", false);
+    }
+
+    wait(0.3, () => {
+      player.isAttacking = false
+    })
+	});
+
+  player.lastIsGrounded = player.grounded();
+  player.lastAnim = player.curAnim;
+  player.lastCompletedAnim = "idle";
+  player.isAttacking = false;
+
+  player.on("update", () => {
+    
+    if (player.grounded() && !player.lastIsGrounded) {
+      player.play("idle");
+    } else if (!player.grounded() && player.lastIsGrounded) {
+      player.play("jump");
+    }
+
+    if (player.lastAnim === "crouchStab" && player.curAnim === undefined) {
+      player.play("crouch");
+    } else if (player.lastAnim === "stab" && player.curAnim === undefined) {
+      player.play("idle");
+    }
+    player.lastIsGrounded = player.grounded();
+
+    // if (player.lastAnim != player.curAnim && player.curAnim !== undefined) {
+      
+    //   player.lastCompletedAnim = player.lastAnim;
+    //   console.log(player.lastCompletedAnim);
+
+    // }
+    player.lastAnim = player.curAnim;
+    
+
+    
+    // if (player.curAnim === undefined) {
+    //   player.play(player.lastCompletedAnim);
+    // }
+  })
+
+  /*****************************************************
+                  MOVEMENT
+  *****************************************************/
+  keyDown(["w", "space"], () => {
 		if (player.grounded()) {
 			player.jump(player.jumpForce);
 		}
 	});
 
-  keyDown("left", () => {
+  keyDown("a", () => {
+    if (player.isAttacking) {
+      return;
+    }
+
 		player.flipX(1);
 		player.move(-player.speed, 0);
 	});
 
-	keyDown("right", () => {
+	keyDown("d", () => {
+    if (player.isAttacking) {
+      return;
+    }
+
 		player.flipX(-1);
 		player.move(player.speed, 0);
 	});
+  console.log({player});
       });
 
     //   kaboom.debug.showArea = !kaboom.debug.showArea;
@@ -105,6 +187,8 @@
 
       // start the game
       start("main");
+
+      
     </script>
   </body>
 </html>
